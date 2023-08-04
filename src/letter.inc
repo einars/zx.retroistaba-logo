@@ -25,7 +25,7 @@ Clear_buf:
     ldir
     ret
 
-Draw_LTR:
+Draw:
     push bc
     push hl
     call Clear_buf
@@ -33,8 +33,15 @@ Draw_LTR:
     pop bc
 
     push bc
+    ld a, (direction)
+    or a
+    jr z, draw_rtl
     call LTR
-    pop bc
+    jr 1f
+draw_rtl
+    call RTL
+1   pop bc
+
     push bc
     call Blit
     pop bc
@@ -44,9 +51,10 @@ Draw_LTR:
     adc a, b
     sub c
     ld b, a
+    ld a, (direction)
+    cpl
+    ld (direction), a
     ret ; bc = bc + 16
-
-    ;ret
 
 Blit:
 ; Blits buffer with a drawn letter into screen coordinates
@@ -66,11 +74,16 @@ Blit:
 
 Set_limit:
     ld (limit), a
-    ld (limit_inc), a
     ret
 
+    module Direction
+    RTL equ 0
+    LTR equ 255
+    endmodule
+
+direction db Direction.LTR
 limit db 9
-limit_inc db 9
+follow_top db 0 ; boolean: when limit != 9, draw either the top lines, or bottom
 
 LTR:
     ld a, (limit)
@@ -78,13 +91,16 @@ LTR:
     ret z
     ld b, a
 
-    ld a, (limit_inc)
-    add_hl_a
+    ld a, (follow_top)
+    or a
+    ld a, b
+    jr z, 1f
+    ld a, 9
+1   add_hl_a
     dec hl
 
     ld a, b
 
-ltr_go
     ld b, 24
     ld c, 0
 
@@ -128,6 +144,64 @@ ltr_skip_bit
 
 
 
+RTL:
+    ld a, (limit)
+    or a
+    ret z
+    ld b, a
+
+    ld a, (follow_top)
+    or a
+    ld a, b
+    jr z, 1f
+    ld a, 9
+1   add_hl_a
+    dec hl
+
+    ld a, b
+
+    ld b, 24
+    ld c, 10
+
+rtl_next_line
+    ld (cur_line), a
+    push bc
+    ld a, (hl)
+
+    rra
+    rra
+    ld d, a
+    ld e, 6 ; bits to print
+
+rtl_next_bit:
+    rr d
+    jr nc, rtl_skip_bit
+
+    push hl
+    call brick_at_bc
+    pop hl
+
+rtl_skip_bit
+
+    inc b ; next letter
+    dec c
+    dec c
+
+    dec e
+    jr nz, rtl_next_bit
+
+    dec hl
+
+    pop bc
+    dec b ; next line
+    dec b
+    dec b
+    ld c, 10
+
+    ld a, (cur_line)
+    dec a
+    ret z
+    jp rtl_next_line
 
 
 

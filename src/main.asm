@@ -51,9 +51,18 @@ Draw_frame:
     call Letter.Blit
     ret
 
+base_dir db 0
+
 Draw_ani:
     ei
     ld hl, steps
+
+    ld a, 0
+    ld (Letter.follow_top), 0
+
+    ld a, (base_dir)
+    cpl
+    ld (base_dir), a
 
 1
     ld a, (hl)
@@ -66,38 +75,38 @@ Draw_ani:
 
     halt
 
+    ld a, (base_dir)
+    ld (Letter.direction), a
+
     ld bc, (6 + 0) * 8 * 256 + 8*11
     ld hl, char_r
-    call Letter.Draw_LTR
+    call Letter.Draw
 
     ld hl, char_e
-    call Letter.Draw_LTR
+    call Letter.Draw
 
     ld hl, char_t
-    call Letter.Draw_LTR
+    call Letter.Draw
 
     ld hl, char_r
-    call Letter.Draw_LTR
+    call Letter.Draw
 
     ld hl, char_o
-    call Letter.Draw_LTR
-
-    ld a, 9
-    ld (Letter.limit_inc), a
+    call Letter.Draw
 
     ld bc,  (6 + 5) * 8 * 256 + 8*10
     ld hl, char_i
-    call Letter.Draw_LTR
+    call Letter.Draw
     ld hl, char_s
-    call Letter.Draw_LTR
+    call Letter.Draw
     ld hl, char_t
-    call Letter.Draw_LTR
+    call Letter.Draw
     ld hl, char_a
-    call Letter.Draw_LTR
+    call Letter.Draw
     ld hl, char_b
-    call Letter.Draw_LTR
+    call Letter.Draw
     ld hl, char_a
-    call Letter.Draw_LTR
+    call Letter.Draw
 
     pop hl
     inc hl
@@ -106,7 +115,7 @@ Draw_ani:
 
 
 steps
-    db 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 8, 7, 6, 5, 4, 3, 2, 1, 1,  255
+    db 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 8, 7, 6, 5, 4, 3, 2, 1, 255
 
     include "letter.inc"
     include "text.inc"
@@ -116,7 +125,7 @@ End equ $
     savesna "retroistaba.sna", Start
 
     emptytap "retroistaba.tap"
-    savetap  "retroistaba.tap",basic,"retro",Basic.start,Basic.length,10
-    savetap  "retroistaba.tap",code,"retro",Start,End-Start
+    savetap  "retroistaba.tap",basic,"Retro",Basic.start,Basic.length,10
+    savetap  "retroistaba.tap",code,"Istaba",Start,End-Start
 
 
