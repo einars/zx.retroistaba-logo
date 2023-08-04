@@ -5,6 +5,17 @@ buf_lines equ 36
 buf_size equ 2 * buf_lines
 height equ 9
 
+;buf ds buf_size, 0xaa
+buf equ 0xbf00
+
+direction  db Direction.LTR
+
+    module Direction
+RTL equ 0
+LTR equ 255
+    endmodule
+
+
 Clear_buf:
     ld hl, buf
     ld de, buf + 1
@@ -34,7 +45,8 @@ draw_rtl
     call Blit
     pop bc
     ld a, 16
-    add_bc_a
+    add c
+    ld c, a
     ld a, (direction)
     cpl
     ld (direction), a
@@ -44,78 +56,61 @@ Blit:
 ; Blits buffer with a drawn letter into screen coordinates
     call Scr_of_XY
     ld hl, buf
-    ld b, buf_lines
-    di
-    ld (smc_sp), sp
-    ld sp, buf
-    ex hl, de
+    ld bc, buf_lines * 2
 1
-    pop de
-    ld (hl), e
-    inc l
-    ld (hl), d
-    dec l
-    lineinc_hl
-    djnz 1b
-smc_sp+*: ld sp, 0
-    ei
+    ldi
+    ldi
+    dec e
+    dec e
+    inc d
+
+    ldi
+    ldi
+    dec e
+    dec e
+    lineinc_de
+    ld a, b
+    or c
+    jr nz, 1b
     ret
+
 
 Set_limit:
     ld (limit), a
     ret
 
-    module Direction
-RTL equ 0
-LTR equ 255
-    endmodule
-
-direction db Direction.LTR
-limit db height
-follow_top db 0 ; boolean: when limit != 9, draw either the top lines, or bottom
-
-LTR:
-    ld a, (limit)
+Prep:
+limit+* ld a, height
     or a
     ret z
-    ld b, a
+    ld e, a
 
-    ld a, (follow_top)
+follow_top+*: ld a, height
     or a
-    ld a, b
+    ld a, e
     jr z, 1f
     ld a, height
 1   add_hl_a
     dec hl
+    ret
 
-    ld a, b
+LTR:
+    call Prep
 
     ld b, 24
     ld c, 0
 
 ltr_next_line
-    push af
     push bc
-    ld d, (hl)
+    ld a, (hl)
 
-    ld e, 6 ; bits to print
-
-ltr_next_bit:
-    rl d
-    jr nc, ltr_skip_bit
-
-    push hl
-    call brick_at_bc
-    pop hl
-
-ltr_skip_bit
-
-    inc b ; next letter
-    inc c
-    inc c
-
-    dec e
-    jr nz, ltr_next_bit
+    dup 6
+      rla
+      call c, brick_at_bc
+      inc b ; next letter
+      inc c
+      inc c
+    edup
 
     dec hl
 
@@ -124,56 +119,31 @@ ltr_skip_bit
     dec b
     dec b
 
-    pop af
-    dec a
-    ret z
-    jp ltr_next_line
+    dec e
+    jr nz, ltr_next_line
+    ret
 
 
 
 RTL:
-    ld a, (limit)
-    or a
-    ret z
-    ld b, a
-
-    ld a, (follow_top)
-    or a
-    ld a, b
-    jr z, 1f
-    ld a, height
-1   add_hl_a
-    dec hl
-
-    ld a, b
+    call Prep
 
     ld b, 24
     ld c, 10
 
 rtl_next_line
-    push af
     push bc
-    ld d, (hl)
-    rr d
-    rr d
-    ld e, 6 ; bits to print
+    ld a, (hl)
+    rra
+    rra
 
-rtl_next_bit:
-    rr d
-    jr nc, rtl_skip_bit
-
-    push hl
-    call brick_at_bc
-    pop hl
-
-rtl_skip_bit
-
+    dup 6
+    rra
+    call c, brick_at_bc
     inc b ; next letter
     dec c
     dec c
-
-    dec e
-    jr nz, rtl_next_bit
+    edup
 
     dec hl
 
@@ -182,10 +152,9 @@ rtl_skip_bit
     dec b
     dec b
 
-    pop af
-    dec a
-    ret z
-    jp rtl_next_line
+    dec e
+    jr nz, rtl_next_line
+    ret
 
 
 
@@ -198,6 +167,8 @@ rtl_skip_bit
 brick_at_bc:
 
     di
+    push af
+    push hl
     ld (smc_brick), sp
     ld hl, buf
     ld a, c
@@ -208,15 +179,17 @@ brick_at_bc:
     add a, b
     add a, b
     add a, l
-    ld l, a ; hl = pointer to our framebuffer byte where the brick will be drawn
+    ld l, a
+    ; hl = buf + x / 8 + y * 2
+    ; hl = pointer to our framebuffer byte where the brick will be drawn
     ld (.smc_store), hl
 .smc_store+*: ld sp, 0
     ld a, c
     and 6
     rra
-    jp z, bit0
+    jr z, bit0
     dec a
-    jp z, bit2
+    jr z, bit2
     dec a
     jp z, bit4
 
@@ -230,8 +203,8 @@ bit6
     ld h, a
     push hl
     pop hl
-    pop hl
 
+    pop hl
     ld a, l
     or  %00000011
     ld l, a
@@ -241,8 +214,8 @@ bit6
     ld h, a
     push hl
     pop hl
-    pop hl
 
+    pop hl
     ld a, l
     and %11111110
     or  %00000010
@@ -252,8 +225,8 @@ bit6
     ld h, a
     push hl
     pop hl
-    pop hl
 
+    pop hl
     ld a, l
     and %11111110
     or  %00000010
@@ -263,8 +236,8 @@ bit6
     ld h, a
     push hl
     pop hl
-    pop hl
 
+    pop hl
     ld a, l
     or %00000001
     ld l, a
@@ -282,32 +255,32 @@ bit0
     ld l, a
     push hl
     pop hl
-    pop hl
 
+    pop hl
     ld a, l
     and %11011111
     or  %11010000
     ld l, a
     push hl
     pop hl
-    pop hl
 
+    pop hl
     ld a, l
     and %10111111
     or  %10110000
     ld l, a
     push hl
     pop hl
-    pop hl
 
+    pop hl
     ld a, l
     and %10111111
     or  %10110000
     ld l, a
     push hl
     pop hl
-    pop hl
 
+    pop hl
     ld a, l
     or  %01100000
     ld l, a
@@ -394,10 +367,9 @@ bit4
 brick_ret
 smc_brick+* ld sp, 0
     ei
+    pop hl
+    pop af
     ret
-
-;buf ds buf_size, 0xaa
-buf equ 0xbf00
 
     endmodule
 

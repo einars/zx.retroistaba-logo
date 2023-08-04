@@ -46,8 +46,6 @@ Clear:
     ret
 
 
-base_dir db 0
-
 Draw_ani:
     ei
     ld hl, steps
@@ -63,7 +61,7 @@ Draw_ani:
 1
     ld a, (hl)
     cp 255
-    jp z, Draw_ani
+    jr z, Draw_ani
 
     call Letter.Set_limit
 
@@ -71,7 +69,7 @@ Draw_ani:
 
     halt
 
-    ld a, (base_dir)
+base_dir+*: ld a, 0
     ld (Letter.direction), a
 
     ld b, 6*8

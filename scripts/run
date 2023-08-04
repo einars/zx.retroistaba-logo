@@ -3,4 +3,5 @@
 set -o errexit -o nounset -o pipefail
 cd "$(dirname "$0")/.."
 
-fuse ./retroistaba.sna
+#fuse ./retroistaba.sna
+fuse --machine 48 --tape ./retroistaba.tap
