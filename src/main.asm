@@ -52,7 +52,8 @@ Draw_ani:
     ei
     ld hl, steps
 
-    ld a, 0
+    ld a, (Letter.follow_top)
+    cpl
     ld (Letter.follow_top), a
 
     ld a, (base_dir)
@@ -127,7 +128,7 @@ End equ $
     display "everything:    ",/A, ($ - Start)
     display "free at least: ",/D, (0xc000 - $)
 
-    ;savesna "retroistaba.sna", Start
+    // savesna "retroistaba.sna", Start
     display "basic-sta", /A, basic_start
     display "basic-len", /A, basic_length
 
