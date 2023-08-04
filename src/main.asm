@@ -2,16 +2,23 @@
 
     include "macros.inc"
 
-    module Basic
-start
-    db 0, 10
-    dw length
-    db 0efh, '""', 0afh, ":" ; LOAD "" CODE
-    db 0f9h, 0c0h, 0b0h, '"49152"', "\n" ; RANDOMIZE USR VAL "49152"
-length equ $ - start
-    endmodule
+    org 0x5ccb
+basic_start equ $
+basic_length equ End - $
 
-    org 0c000h
+line10:
+    db 0, 10
+    dw .len
+.cmds
+    ;db 0f9h, 0c0h, 0b0h, '"49152"', "\n" ; RANDOMIZE USR VAL "49152"
+    db 0f9h, 0c0h, 0b0h, '"23774"', "\n" ; RANDOMIZE USR VAL "49152"
+.len equ $ - .cmds
+
+    db 0, 15
+    dw End - Start
+
+
+    ;org 0c000h
 
 Start:
     jp 1f
@@ -31,7 +38,7 @@ Clear:
     ld hl, 0x4000
     ld de, 0x4001
     ld bc, 6144
-    ld (hl), a
+    ld (hl), 0
     ldir
     ld (hl), 7*8 + 0
     ld bc, 767
@@ -112,6 +119,7 @@ steps
     include "text.inc"
     include "scr_of_xy.short.inc"
 
+
 End equ $
 
     display "start:         ",/A, Start
@@ -119,10 +127,11 @@ End equ $
     display "everything:    ",/A, ($ - Start)
     display "free at least: ",/D, (0xc000 - $)
 
-    savesna "retroistaba.sna", Start
+    ;savesna "retroistaba.sna", Start
+    display "basic-sta", /A, basic_start
+    display "basic-len", /A, basic_length
 
     emptytap "retroistaba.tap"
-    savetap  "retroistaba.tap",basic,"Retro",Basic.start,Basic.length,10
-    savetap  "retroistaba.tap",code,"Istaba",Start,End-Start
+    savetap  "retroistaba.tap", basic, "Retro", basic_start, basic_length, 10
 
 
