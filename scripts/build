@@ -8,5 +8,6 @@ compiler='/proj/isaac/tools/sjasmplus/build/sjasmplus'
 $compiler \
   --syntax=ab \
   --sym=retroistaba.sym \
+  --lst=retroistaba.lst \
   src/main.asm
 

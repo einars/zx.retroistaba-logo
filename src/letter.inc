@@ -1,21 +1,10 @@
-Letter_height equ 9
 
     module Letter
 
-        align 256
-bitses  dg x-------
-        dg -x------
-        dg --x-----
-        dg ---x----
-        dg ----x---
-        dg -----x--
-        dg ------x-
-        dg -------x
-
 buf_lines equ 36
 buf_size equ 2 * buf_lines
-buf ds buf_size, 0xaa
 cur_line db 0xaa
+height equ 9
 
 Clear_buf:
     ld hl, buf
@@ -77,12 +66,12 @@ Set_limit:
     ret
 
     module Direction
-    RTL equ 0
-    LTR equ 255
+RTL equ 0
+LTR equ 255
     endmodule
 
 direction db Direction.LTR
-limit db 9
+limit db height
 follow_top db 0 ; boolean: when limit != 9, draw either the top lines, or bottom
 
 LTR:
@@ -95,7 +84,7 @@ LTR:
     or a
     ld a, b
     jr z, 1f
-    ld a, 9
+    ld a, height
 1   add_hl_a
     dec hl
 
@@ -154,7 +143,7 @@ RTL:
     or a
     ld a, b
     jr z, 1f
-    ld a, 9
+    ld a, height
 1   add_hl_a
     dec hl
 
@@ -368,5 +357,8 @@ bit4
     or  %00000110
     ld (hl), a
     ret
+
+buf ds buf_size, 0xaa
+
     endmodule
 

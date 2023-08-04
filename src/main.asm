@@ -1,5 +1,7 @@
     device zxspectrum48
 
+    include "macros.inc"
+
     module Basic
 start
     db 0, 10
@@ -14,16 +16,12 @@ length equ $ - start
 Start:
     jp 1f
 
-    ei
+    ei ; made in Latvia
     di
     rst 0
-    db "Made in Latvia"
-
-    include "util.inc"
 
 1   
     call Clear
-    ;call Draw_frame
     call Draw_ani
 
     di
@@ -35,21 +33,11 @@ Clear:
     ld bc, 6144
     ld (hl), a
     ldir
-    ld (hl), 7*8
+    ld (hl), 7*8 + 0
     ld bc, 767
     ldir
     ret
 
-
-Draw_frame:
-    
-    ld hl, char_r
-    call Letter.LTR
-
-
-    ld bc, 0x0000
-    call Letter.Blit
-    ret
 
 base_dir db 0
 
@@ -58,7 +46,7 @@ Draw_ani:
     ld hl, steps
 
     ld a, 0
-    ld (Letter.follow_top), 0
+    ld (Letter.follow_top), a
 
     ld a, (base_dir)
     cpl
@@ -78,7 +66,8 @@ Draw_ani:
     ld a, (base_dir)
     ld (Letter.direction), a
 
-    ld bc, (6 + 0) * 8 * 256 + 8*11
+    ld b, 6*8
+    ld c, 11*8
     ld hl, char_r
     call Letter.Draw
 
@@ -94,7 +83,9 @@ Draw_ani:
     ld hl, char_o
     call Letter.Draw
 
-    ld bc,  (6 + 5) * 8 * 256 + 8*10
+    ld b, 11*8
+    ld c, 10*8
+
     ld hl, char_i
     call Letter.Draw
     ld hl, char_s
@@ -119,8 +110,14 @@ steps
 
     include "letter.inc"
     include "text.inc"
+    include "scr_of_xy.short.inc"
 
 End equ $
+
+    display "start:         ",/A, Start
+    display "top:           ",/A, $
+    display "everything:    ",/A, ($ - Start)
+    display "free at least: ",/D, (0xc000 - $)
 
     savesna "retroistaba.sna", Start
 
