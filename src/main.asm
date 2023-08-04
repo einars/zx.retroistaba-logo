@@ -72,8 +72,8 @@ Draw_ani:
 base_dir+*: ld a, 0
     ld (Letter.direction), a
 
-    ld b, 6*8
-    ld c, 11*8
+    ld b, 6
+    ld c, 11
     ld hl, char_r
     call Letter.Draw
 
@@ -89,8 +89,8 @@ base_dir+*: ld a, 0
     ld hl, char_o
     call Letter.Draw
 
-    ld b, 11*8
-    ld c, 10*8
+    ld b, 11
+    ld c, 10
 
     ld hl, char_i
     call Letter.Draw
@@ -116,7 +116,8 @@ steps
 
     include "letter.inc"
     include "text.inc"
-    include "scr_of_xy.short.inc"
+    ;include "scr_of_xy.short.inc"
+    include "scr_of_pq.inc"
 
 
 End equ $

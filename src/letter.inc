@@ -44,9 +44,8 @@ draw_rtl
     push bc
     call Blit
     pop bc
-    ld a, 16
-    add c
-    ld c, a
+    inc c
+    inc c
     ld a, (direction)
     cpl
     ld (direction), a
@@ -54,7 +53,7 @@ draw_rtl
 
 Blit:
 ; Blits buffer with a drawn letter into screen coordinates
-    call Scr_of_XY
+    call Scr_of_PQ
     ld hl, buf
     ld bc, buf_lines * 2
 1
