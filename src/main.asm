@@ -126,7 +126,6 @@ End equ $
     display "start:         ",/A, Start
     display "top:           ",/A, $
     display "everything:    ",/A, ($ - Start)
-    display "free at least: ",/D, (0xc000 - $)
 
     // savesna "retroistaba.sna", Start
     display "basic-sta", /A, basic_start

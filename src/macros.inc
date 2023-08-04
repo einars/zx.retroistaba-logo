@@ -2,6 +2,14 @@ breakpoint      macro
 @breakpoint
                 endm
 
+add_bc_a        macro
+                add a, c
+                ld c, a
+                adc a, b
+                sub c
+                ld b, a
+                endm
+
 add_hl_a        macro
                 add a, l
                 ld l, a

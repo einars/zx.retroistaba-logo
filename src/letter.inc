@@ -3,7 +3,6 @@
 
 buf_lines equ 36
 buf_size equ 2 * buf_lines
-cur_line db 0xaa
 height equ 9
 
 Clear_buf:
@@ -35,30 +34,31 @@ draw_rtl
     call Blit
     pop bc
     ld a, 16
-    add a, c
-    ld c, a
-    adc a, b
-    sub c
-    ld b, a
+    add_bc_a
     ld a, (direction)
     cpl
     ld (direction), a
-    ret ; bc = bc + 16
+    ret
 
 Blit:
 ; Blits buffer with a drawn letter into screen coordinates
     call Scr_of_XY
     ld hl, buf
-    ld bc, 2*buf_lines
+    ld b, buf_lines
+    di
+    ld (smc_sp), sp
+    ld sp, buf
+    ex hl, de
 1
-    ldi
-    ldi
-    dec e
-    dec e
-    lineinc_de
-    ld a, b
-    or c
-    jr nz, 1b
+    pop de
+    ld (hl), e
+    inc l
+    ld (hl), d
+    dec l
+    lineinc_hl
+    djnz 1b
+smc_sp+*: ld sp, 0
+    ei
     ret
 
 Set_limit:
@@ -94,11 +94,10 @@ LTR:
     ld c, 0
 
 ltr_next_line
-    ld (cur_line), a
+    push af
     push bc
-    ld a, (hl)
+    ld d, (hl)
 
-    ld d, a
     ld e, 6 ; bits to print
 
 ltr_next_bit:
@@ -124,9 +123,8 @@ ltr_skip_bit
     dec b ; next line
     dec b
     dec b
-    ld c, 0
 
-    ld a, (cur_line)
+    pop af
     dec a
     ret z
     jp ltr_next_line
@@ -153,13 +151,11 @@ RTL:
     ld c, 10
 
 rtl_next_line
-    ld (cur_line), a
+    push af
     push bc
-    ld a, (hl)
-
-    rra
-    rra
-    ld d, a
+    ld d, (hl)
+    rr d
+    rr d
     ld e, 6 ; bits to print
 
 rtl_next_bit:
@@ -185,9 +181,8 @@ rtl_skip_bit
     dec b ; next line
     dec b
     dec b
-    ld c, 10
 
-    ld a, (cur_line)
+    pop af
     dec a
     ret z
     jp rtl_next_line
@@ -267,8 +262,6 @@ bit6
     ld a, (hl)
     or %10000000
     ld (hl), a
-    inc hl
-
     ret
 
 bit0
@@ -358,7 +351,8 @@ bit4
     ld (hl), a
     ret
 
-buf ds buf_size, 0xaa
+;buf ds buf_size, 0xaa
+buf equ 0xbf00
 
     endmodule
 
