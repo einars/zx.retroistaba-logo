@@ -196,6 +196,9 @@ rtl_skip_bit
 ;  .XX.
 
 brick_at_bc:
+
+    di
+    ld (smc_brick), sp
     ld hl, buf
     ld a, c
     and 0xf8
@@ -205,150 +208,192 @@ brick_at_bc:
     add a, b
     add a, b
     add a, l
-    ld l, a ; hl = base screen address
+    ld l, a ; hl = pointer to our framebuffer byte where the brick will be drawn
+    ld (.smc_store), hl
+.smc_store+*: ld sp, 0
     ld a, c
     and 6
     rra
-    jr z, bit0
+    jp z, bit0
     dec a
-    jr z, bit2
+    jp z, bit2
     dec a
-    jr z, bit4
+    jp z, bit4
 
 bit6
-    ld a, (hl)
+    pop hl
+    ld a, l
     or %00000001
-    ld (hl), a
-    inc hl
-    ld a, (hl)
+    ld l, a
+    ld a, h
     or %10000000
-    ld (hl), a
-    inc hl
+    ld h, a
+    push hl
+    pop hl
+    pop hl
 
-    ld a, (hl)
+    ld a, l
     or  %00000011
-    ld (hl), a
-    inc hl
-    ld a, (hl)
+    ld l, a
+    ld a, h
     and %01111111
     or  %01000000
-    ld (hl), a
-    inc hl
+    ld h, a
+    push hl
+    pop hl
+    pop hl
 
-    ld a, (hl)
+    ld a, l
     and %11111110
     or  %00000010
-    ld (hl), a
-    inc hl
-    ld a, (hl)
+    ld l, a
+    ld a, h
     or  %11000000
-    ld (hl), a
-    inc hl
+    ld h, a
+    push hl
+    pop hl
+    pop hl
 
-    ld a, (hl)
+    ld a, l
     and %11111110
     or  %00000010
-    ld (hl), a
-    inc hl
-    ld a, (hl)
+    ld l, a
+    ld a, h
     or  %11000000
-    ld (hl), a
-    inc hl
+    ld h, a
+    push hl
+    pop hl
+    pop hl
 
-    ld a, (hl)
+    ld a, l
     or %00000001
-    ld (hl), a
-    inc hl
-    ld a, (hl)
+    ld l, a
+    ld a, h
     or %10000000
-    ld (hl), a
-    ret
+    ld h, a
+    push hl
+    jp brick_ret
+
 
 bit0
-    ld a, (hl)
+    pop hl
+    ld a, l
     or %01100000
-    ld (hl), a
-    inc hl
-    inc hl
-    ld a, (hl)
+    ld l, a
+    push hl
+    pop hl
+    pop hl
+
+    ld a, l
     and %11011111
     or  %11010000
-    ld (hl), a
-    inc hl
-    inc hl
-    ld a, (hl)
+    ld l, a
+    push hl
+    pop hl
+    pop hl
+
+    ld a, l
     and %10111111
     or  %10110000
-    ld (hl), a
-    inc hl
-    inc hl
-    ld a, (hl)
+    ld l, a
+    push hl
+    pop hl
+    pop hl
+
+    ld a, l
     and %10111111
     or  %10110000
-    ld (hl), a
-    inc hl
-    inc hl
-    ld a, (hl)
+    ld l, a
+    push hl
+    pop hl
+    pop hl
+
+    ld a, l
     or  %01100000
-    ld (hl), a
-    ret
+    ld l, a
+    push hl
+    jp brick_ret
 
 bit2
-    ld a, (hl)
+    pop hl
+    ld a, l
     or %00011000
-    ld (hl), a
-    inc hl
-    inc hl
-    ld a, (hl)
+    ld l, a
+    push hl
+    pop hl
+
+    pop hl
+    ld a, l
     and %11110111
     or  %00110100
-    ld (hl), a
-    inc hl
-    inc hl
-    ld a, (hl)
+    ld l, a
+    push hl
+    pop hl
+
+    pop hl
+    ld a, l
     and %11101111
     or  %00101100
-    ld (hl), a
-    inc hl
-    inc hl
-    ld a, (hl)
+    ld l, a
+    push hl
+    pop hl
+
+    pop hl
+    ld a, l
     and %11101111
     or  %00101100
-    ld (hl), a
-    inc hl
-    inc hl
-    ld a, (hl)
+    ld l, a
+    push hl
+    pop hl
+
+    pop hl
+    ld a, l
     or  %00011000
-    ld (hl), a
-    ret
+    ld l, a
+    push hl
+    jp brick_ret
     
 bit4
-    ld a, (hl)
+    pop hl
+    ld a, l
     or %00000110
-    ld (hl), a
-    inc hl
-    inc hl
-    ld a, (hl)
+    ld l, a
+    push hl
+    pop hl
+
+    pop hl
+    ld a, l
     and %11111101
     or  %00001101
-    ld (hl), a
-    inc hl
-    inc hl
-    ld a, (hl)
+    ld l, a
+    push hl
+    pop hl
+
+    pop hl
+    ld a, l
     and %11111011
     or  %00001011
-    ld (hl), a
-    inc hl
-    inc hl
-    ld a, (hl)
+    ld l, a
+    push hl
+    pop hl
+
+    pop hl
+    ld a, l
     and %11111011
     or  %00001011
-    ld (hl), a
-    inc hl
-    inc hl
-    ld a, (hl)
+    ld l, a
+    push hl
+    pop hl
+
+    pop hl
+    ld a, l
     or  %00000110
-    ld (hl), a
+    ld l, a
+    push hl
+
+brick_ret
+smc_brick+* ld sp, 0
+    ei
     ret
 
 ;buf ds buf_size, 0xaa
