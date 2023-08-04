@@ -66,36 +66,35 @@ Draw_ani:
 
     halt
 
+    ld bc, (6 + 0) * 8 * 256 + 8*11
     ld hl, char_r
-    call Letter.LTR
-
-    ld bc, 8*3*0
-    call Letter.Blit
+    call Letter.Draw_LTR
 
     ld hl, char_e
-    call Letter.LTR
-
-    ld bc, 8*2*1
-    call Letter.Blit
+    call Letter.Draw_LTR
 
     ld hl, char_t
-    call Letter.LTR
-
-    ld bc, 8*2*2
-    call Letter.Blit
+    call Letter.Draw_LTR
 
     ld hl, char_r
-    call Letter.LTR
-
-    ld bc, 8*2*3
-    call Letter.Blit
+    call Letter.Draw_LTR
 
     ld hl, char_o
-    call Letter.LTR
+    call Letter.Draw_LTR
 
-    ld bc, 8*2*4
-    call Letter.Blit
-
+    ld bc,  (6 + 5) * 8 * 256 + 8*10
+    ld hl, char_i
+    call Letter.Draw_LTR
+    ld hl, char_s
+    call Letter.Draw_LTR
+    ld hl, char_t
+    call Letter.Draw_LTR
+    ld hl, char_a
+    call Letter.Draw_LTR
+    ld hl, char_b
+    call Letter.Draw_LTR
+    ld hl, char_a
+    call Letter.Draw_LTR
 
     pop hl
     inc hl
@@ -104,7 +103,7 @@ Draw_ani:
 
 
 steps
-    db 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9, 9, 8, 7, 6, 5, 4, 3, 2, 0
+    db 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9, 9, 9, 9, 8, 7, 6, 5, 4, 3, 2, 0
 
     include "letter.inc"
     include "text.inc"

@@ -25,6 +25,23 @@ Clear_buf:
     ldir
     ret
 
+Draw_LTR:
+    push bc
+    call LTR
+    pop bc
+    push bc
+    call Blit
+    pop bc
+    ld a, 16
+    add a, c
+    ld c, a
+    adc a, b
+    sub c
+    ld b, a
+    ret ; bc = bc + 16
+
+    ;ret
+
 Blit:
 ; Blits buffer with a drawn letter into screen coordinates
     call Scr_of_XY
@@ -44,6 +61,7 @@ Blit:
 Set_limit:
     ld (lim), a
     ret
+
 
 
 LTR:
@@ -76,45 +94,8 @@ next_bit:
     rl d
     jr nc, skip_bit
 
-; draw bit in buffer, at [b c] pixel coordinates
-    ; highly unoptimized
-    push bc
-    push hl
-    push de
-    inc c  ; 1
-    call pix
-    inc c
-    call pix
-    inc c
-    inc b ; 2
-    call pix
-    dec c
-    call clr
-    dec c
-    call pix
-    dec c
-    call pix
-    inc b ; 3
-    call pix
-    inc c
-    call clr
-    inc c
-    call pix
-    inc c
-    call pix
-    inc b ; 4
-    call pix
-    dec c
-    call pix
-    dec c
-    call clr
-    dec c
-    call pix
-    inc b ; 5
-    inc c
-    call pix
-    inc c
-    call pix
+    call brick_at_bc
+
 
     pop de
     pop hl
@@ -186,6 +167,47 @@ clr
     and (hl)
     ld (hl), a
     ret
+
+brick_at_bc:
+; draw bit in buffer, at [b c] pixel coordinates
+    ; highly unoptimized
+    push bc
+    push hl
+    push de
+    inc c  ; 1
+    call pix
+    inc c
+    call pix
+    inc c
+    inc b ; 2
+    call pix
+    dec c
+    call clr
+    dec c
+    call pix
+    dec c
+    call pix
+    inc b ; 3
+    call pix
+    inc c
+    call clr
+    inc c
+    call pix
+    inc c
+    call pix
+    inc b ; 4
+    call pix
+    dec c
+    call pix
+    dec c
+    call clr
+    dec c
+    call pix
+    inc b ; 5
+    inc c
+    call pix
+    inc c
+    call pix
 
     endmodule
 
