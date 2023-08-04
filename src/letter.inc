@@ -27,6 +27,12 @@ Clear_buf:
 
 Draw_LTR:
     push bc
+    push hl
+    call Clear_buf
+    pop hl
+    pop bc
+
+    push bc
     call LTR
     pop bc
     push bc
@@ -59,30 +65,30 @@ Blit:
     ret
 
 Set_limit:
-    ld (lim), a
+    ld (limit), a
+    ld (limit_inc), a
     ret
 
-
+limit db 9
+limit_inc db 9
 
 LTR:
-    push hl
-    call Clear_buf
-    pop hl
-
-lim+*: ld a, 9
+    ld a, (limit)
     or a
     ret z
+    ld b, a
 
-    ;ld b, a
-    ld b, 9
-1   inc hl
-    djnz 1b
+    ld a, (limit_inc)
+    add_hl_a
     dec hl
 
+    ld a, b
+
+ltr_go
     ld b, 24
     ld c, 0
 
-next_line
+ltr_next_line
     ld (cur_line), a
     push bc
     ld a, (hl)
@@ -90,25 +96,22 @@ next_line
     ld d, a
     ld e, 6 ; bits to print
 
-next_bit:
+ltr_next_bit:
     rl d
-    jr nc, skip_bit
+    jr nc, ltr_skip_bit
 
+    push hl
     call brick_at_bc
-
-
-    pop de
     pop hl
-    pop bc
 
-skip_bit
+ltr_skip_bit
 
     inc b ; next letter
     inc c
     inc c
 
     dec e
-    jr nz, next_bit
+    jr nz, ltr_next_bit
 
     dec hl
 
@@ -121,93 +124,175 @@ skip_bit
     ld a, (cur_line)
     dec a
     ret z
-    jp next_line
+    jp ltr_next_line
 
-pix
-    ld e, b
-    ld d, 0
-    ld hl, buf
-    add hl, de
-    add hl, de
-    ld a, c
-    and 0xf8
-    rra
-    rra
-    rra
-    add_hl_a ; HL = address in buffer
 
-    ld de, bitses
-    ld a, c
-    and 7
-    ld e, a
-    ld a, (de)
-    or (hl)
-    ld (hl), a
-    ret
 
-clr
-    ld e, b
-    ld d, 0
-    ld hl, buf
-    add hl, de
-    add hl, de
-    ld a, c
-    and 0xf8
-    rra
-    rra
-    rra
-    add_hl_a ; HL = address in buffer
 
-    ld de, bitses
-    ld a, c
-    and 7
-    ld e, a
-    ld a, (de)
-    cpl
-    and (hl)
-    ld (hl), a
-    ret
+
+
+;  .XX.
+;  XX+X
+;  X+XX
+;  X+XX
+;  .XX.
 
 brick_at_bc:
-; draw bit in buffer, at [b c] pixel coordinates
-    ; highly unoptimized
-    push bc
-    push hl
-    push de
-    inc c  ; 1
-    call pix
-    inc c
-    call pix
-    inc c
-    inc b ; 2
-    call pix
-    dec c
-    call clr
-    dec c
-    call pix
-    dec c
-    call pix
-    inc b ; 3
-    call pix
-    inc c
-    call clr
-    inc c
-    call pix
-    inc c
-    call pix
-    inc b ; 4
-    call pix
-    dec c
-    call pix
-    dec c
-    call clr
-    dec c
-    call pix
-    inc b ; 5
-    inc c
-    call pix
-    inc c
-    call pix
+    ld hl, buf
+    ld a, c
+    and 0xf8
+    rra
+    rra
+    rra
+    add a, b
+    add a, b
+    add a, l
+    ld l, a ; hl = base screen address
+    ld a, c
+    and 6
+    rra
+    jr z, bit0
+    dec a
+    jr z, bit2
+    dec a
+    jr z, bit4
 
+bit6
+    ld a, (hl)
+    or %00000001
+    ld (hl), a
+    inc hl
+    ld a, (hl)
+    or %10000000
+    ld (hl), a
+    inc hl
+
+    ld a, (hl)
+    or  %00000011
+    ld (hl), a
+    inc hl
+    ld a, (hl)
+    and %01111111
+    or  %01000000
+    ld (hl), a
+    inc hl
+
+    ld a, (hl)
+    and %11111110
+    or  %00000010
+    ld (hl), a
+    inc hl
+    ld a, (hl)
+    or  %11000000
+    ld (hl), a
+    inc hl
+
+    ld a, (hl)
+    and %11111110
+    or  %00000010
+    ld (hl), a
+    inc hl
+    ld a, (hl)
+    or  %11000000
+    ld (hl), a
+    inc hl
+
+    ld a, (hl)
+    or %00000001
+    ld (hl), a
+    inc hl
+    ld a, (hl)
+    or %10000000
+    ld (hl), a
+    inc hl
+
+    ret
+
+bit0
+    ld a, (hl)
+    or %01100000
+    ld (hl), a
+    inc hl
+    inc hl
+    ld a, (hl)
+    and %11011111
+    or  %11010000
+    ld (hl), a
+    inc hl
+    inc hl
+    ld a, (hl)
+    and %10111111
+    or  %10110000
+    ld (hl), a
+    inc hl
+    inc hl
+    ld a, (hl)
+    and %10111111
+    or  %10110000
+    ld (hl), a
+    inc hl
+    inc hl
+    ld a, (hl)
+    or  %01100000
+    ld (hl), a
+    ret
+
+bit2
+    ld a, (hl)
+    or %00011000
+    ld (hl), a
+    inc hl
+    inc hl
+    ld a, (hl)
+    and %11110111
+    or  %00110100
+    ld (hl), a
+    inc hl
+    inc hl
+    ld a, (hl)
+    and %11101111
+    or  %00101100
+    ld (hl), a
+    inc hl
+    inc hl
+    ld a, (hl)
+    and %11101111
+    or  %00101100
+    ld (hl), a
+    inc hl
+    inc hl
+    ld a, (hl)
+    or  %00011000
+    ld (hl), a
+    ret
+    
+bit4
+    ld a, (hl)
+    or %00000110
+    ld (hl), a
+    inc hl
+    inc hl
+    ld a, (hl)
+    and %11111101
+    or  %00001101
+    ld (hl), a
+    inc hl
+    inc hl
+    ld a, (hl)
+    and %11111011
+    or  %00001011
+    ld (hl), a
+    inc hl
+    inc hl
+    ld a, (hl)
+    and %11111011
+    or  %00001011
+    ld (hl), a
+    inc hl
+    inc hl
+    ld a, (hl)
+    or  %00000110
+    ld (hl), a
+    ret
     endmodule
 

@@ -1,3 +1,7 @@
+breakpoint      macro
+@breakpoint
+                endm
+                
 add_hl_a        macro
                 add a, l
                 ld l, a

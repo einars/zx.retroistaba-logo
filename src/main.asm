@@ -57,7 +57,7 @@ Draw_ani:
 
 1
     ld a, (hl)
-    or a
+    cp 255
     jp z, Draw_ani
 
     call Letter.Set_limit
@@ -82,6 +82,9 @@ Draw_ani:
     ld hl, char_o
     call Letter.Draw_LTR
 
+    ld a, 9
+    ld (Letter.limit_inc), a
+
     ld bc,  (6 + 5) * 8 * 256 + 8*10
     ld hl, char_i
     call Letter.Draw_LTR
@@ -103,7 +106,7 @@ Draw_ani:
 
 
 steps
-    db 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9, 9, 9, 9, 8, 7, 6, 5, 4, 3, 2, 0
+    db 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 8, 7, 6, 5, 4, 3, 2, 1, 1,  255
 
     include "letter.inc"
     include "text.inc"
