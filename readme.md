@@ -4,4 +4,4 @@ https://www.retroistaba.com/
 
 Palaid retroistaba.tap ar jebkuru ZX Spectrum emulatoru
 
-https://youtu.be/2NRMiWNJA4c
+https://youtu.be/GX5erhHNeBE
