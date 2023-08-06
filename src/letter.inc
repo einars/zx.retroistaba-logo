@@ -181,8 +181,7 @@ brick_at_bc:
     ld l, a
     ; hl = buf + x / 8 + y * 2
     ; hl = pointer to our framebuffer byte where the brick will be drawn
-    ld (.smc_store), hl
-.smc_store+*: ld sp, 0
+    ld sp, hl
     ld a, c
     and 6
     rra
