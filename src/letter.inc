@@ -84,7 +84,7 @@ limit+* ld a, height
     ret z
     ld e, a
 
-follow_top+*: ld a, height
+follow_top+*: ld a, true
     or a
     ld a, e
     jr z, 1f

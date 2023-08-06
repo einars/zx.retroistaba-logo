@@ -2,23 +2,10 @@
 
     include "macros.inc"
 
-    org 0x5ccb
-basic_start equ $
-basic_length equ End - $
+    ;include "basic.enable.inc" ; create compact retroistaba.tap, all packed into basic code
+    include "basic.disable.inc" ; create generic retroistaba.sna, faster debugging, simpler breakpoints etc
 
-line10:
-    db 0, 10
-    dw .len
-.cmds
-    ;db 0f9h, 0c0h, 0b0h, '"49152"', "\n" ; RANDOMIZE USR VAL "49152"
-    db 0f9h, 0c0h, 0b0h, '"23774"', "\n" ; RANDOMIZE USR VAL "49152"
-.len equ $ - .cmds
-
-    db 0, 15
-    dw End - Start
-
-
-    ;org 0c000h
+    prelude
 
 Start:
     jp 1f
@@ -28,11 +15,23 @@ Start:
     rst 0
 
 1   
+    ei
     call Clear
-    call Draw_ani
 
-    di
-    halt
+    call Scene.retroistaba.Init
+    ld hl, Scene.retroistaba.Step
+    jp call_forever
+
+    ;call Scene.show_build.Init
+    ;ld hl, Scene.show_build.Step
+    ;jp call_forever
+
+
+call_forever:
+    ld (.s + 1), hl
+.s  call 0
+    jr .s
+
 
 Clear:
     ld hl, 0x4000
@@ -47,77 +46,19 @@ Clear:
 
 
 Draw_ani:
-    ei
-    ld hl, steps
-
-    ld a, (Letter.follow_top)
-    cpl
-    ld (Letter.follow_top), a
-
-    ld a, (base_dir)
-    cpl
-    ld (base_dir), a
-
-1
-    ld a, (hl)
-    cp 255
-    jr z, Draw_ani
-
-    call Letter.Set_limit
-
-    push hl
-
-    halt
-
-base_dir+*: ld a, 0
-    ld (Letter.direction), a
-
-    ld b, 6
-    ld c, 11
-    ld hl, char_r
-    call Letter.Draw
-
-    ld hl, char_e
-    call Letter.Draw
-
-    ld hl, char_t
-    call Letter.Draw
-
-    ld hl, char_r
-    call Letter.Draw
-
-    ld hl, char_o
-    call Letter.Draw
-
-    ld b, 11
-    ld c, 10
-
-    ld hl, char_i
-    call Letter.Draw
-    ld hl, char_s
-    call Letter.Draw
-    ld hl, char_t
-    call Letter.Draw
-    ld hl, char_a
-    call Letter.Draw
-    ld hl, char_b
-    call Letter.Draw
-    ld hl, char_a
-    call Letter.Draw
-
-    pop hl
-    inc hl
-    jp 1b
 
 
 
-steps
-    db 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 8, 7, 6, 5, 4, 3, 2, 1, 255
 
     include "letter.inc"
     include "text.inc"
     ;include "scr_of_xy.short.inc"
     include "scr_of_pq.inc"
+
+    module Scene
+    include "scene.show_build.inc"
+    include "scene.retroistaba.inc"
+    endmodule
 
 
 End equ $
@@ -126,11 +67,5 @@ End equ $
     display "top:           ",/A, $
     display "everything:    ",/A, ($ - Start)
 
-    // savesna "retroistaba.sna", Start
-    display "basic-sta", /A, basic_start
-    display "basic-len", /A, basic_length
 
-    emptytap "retroistaba.tap"
-    savetap  "retroistaba.tap", basic, "Retro", basic_start, basic_length, 10
-
-
+    result_save

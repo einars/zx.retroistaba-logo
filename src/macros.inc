@@ -1,3 +1,6 @@
+true            equ 255
+false           equ 0
+
 breakpoint      macro
 @breakpoint
                 endm
@@ -54,5 +57,15 @@ lineinc_hl      macro
                 sub 8
                 ld h, a
 .lq
+                endm
+
+
+stop            macro
+                ld (.nn), a
+                ld a, 0x3
+                out (254), a
+.nn+*:          ld a, 0 ; restore initial a
+                di
+                halt
                 endm
 
